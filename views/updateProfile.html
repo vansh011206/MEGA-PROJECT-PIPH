@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Update Profile</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #a8d08d, #f5f5f5);
+        background-size: cover;
+        color: #333;
+      }
+      .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .profile-container {
+        background: white;
+        width: 80%;
+        max-width: 1200px;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-wrap: wrap;
+        overflow: hidden;
+      }
+      .profile-left {
+        flex: 1;
+        max-width: 50%;
+        text-align: center;
+        padding-right: 20px;
+        position: relative;
+      }
+      .profile-left img {
+        width: 100%;
+        height: 350px;
+        max-width: 350px;
+        border-radius: 50%;
+        object-fit: cover;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+      .profile-left img:hover {
+        transform: scale(1.05);
+      }
+      .profile-right {
+        flex: 2;
+        display: flex;
+        flex-direction: column;
+        max-width: 50%;
+        padding-left: 20px;
+        border-left: 2px solid #388e3c;
+      }
+      .profile-right h2 {
+        color: #388e3c;
+        margin-bottom: 20px;
+        font-size: 28px;
+        font-weight: bold;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 10px 0;
+      }
+      .info-row label {
+        font-size: 18px;
+        color: #333;
+        font-weight: bold;
+        width: 150px;
+      }
+      .info-row input {
+        flex: 1;
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 12px;
+        border: 2px solid #388e3c;
+        transition: all 0.3s ease;
+        background-color: #f9f9f9;
+      }
+      .info-row input:focus {
+        border-color: #2c6c2d;
+        background-color: #e8f5e9;
+      }
+      .info-row .edit-icon {
+        font-size: 20px;
+        color: #388e3c;
+        cursor: pointer;
+        margin-left: 10px;
+      }
+      .info-row .edit-icon:hover {
+        color: #2c6c2d;
+      }
+      .badges-section {
+        margin-top: 30px;
+        text-align: center;
+        width: 100%;
+        margin-left: 0;
+      }
+      .badge {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #388e3c;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 24px;
+        margin: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .badge:hover {
+        background-color: #2c6c2d;
+        transform: scale(1.1);
+      }
+      .show-more-btn {
+        padding: 12px 24px;
+        background-color: #388e3c;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        border: none;
+        margin-top: 20px;
+        transition: all 0.3s ease;
+      }
+      .show-more-btn:hover {
+        background-color: #2c6c2d;
+        transform: scale(1.05);
+      }
+      .popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .popup-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+      }
+      .popup-content h3 {
+        color: #388e3c;
+        font-size: 22px;
+      }
+      .popup-content p {
+        font-size: 16px;
+        color: #333;
+      }
+      .close-popup {
+        padding: 10px 20px;
+        background-color: #388e3c;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+        margin-top: 20px;
+        transition: all 0.3s ease;
+      }
+      .close-popup:hover {
+        background-color: #2c6c2d;
+      }
+      .actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+        gap: 20px;
+      }
+      .save-btn,
+      .cancel-btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .save-btn {
+        background-color: #388e3c;
+        color: white;
+      }
+      .save-btn:hover {
+        background-color: #2c6c2d;
+      }
+      .cancel-btn {
+        background-color: #ccc;
+        color: black;
+      }
+      .cancel-btn:hover {
+        background-color: #999;
+      }
+      /* Styles for image options */
+      .image-options {
+        display: none;
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 1001;
+      }
+      .image-options button {
+        background-color: #388e3c;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        margin: 5px 0;
+        cursor: pointer;
+        width: 100%;
+        border-radius: 8px;
+      }
+      .image-options button:hover {
+        background-color: #2c6c2d;
+      }
+      .back-btn {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        border-radius: 5px;
+        background-color: #388e3c;
+        color: white;
+        cursor: pointer;
+        border: none;
+        outline: none;
+        padding: 10px;
+        transition: all 0.5s ease;
+      }
+      .back-btn:hover{
+        background-color: #2c6c2d;
+        transform: scale(1.08);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="profile-container">
+        <!-- Left Side: Profile Image -->
+        <div class="profile-left">
+          <img
+            src="Snapchat-102649415.jpg"
+            alt="Profile Picture"
+            id="profilePic"
+            onclick="showImageOptions()"
+          />
+          <div class="image-options" id="imageOptions">
+            <button onclick="viewImage()">View Image</button>
+            <button onclick="updateImage()">Update Image</button>
+          </div>
+        </div>
+
+        <!-- Right Side: Profile Information -->
+        <div class="profile-right">
+          <h2>Profile Information</h2>
+
+          <!-- Full Name -->
+          <div class="info-row">
+            <label for="fullName">Full Name:</label>
+            <input
+              type="text"
+              id="fullName"
+              value=""
+              placeholder="Full Name"
+              disabled
+            />
+            <span class="edit-icon" onclick="enableEdit('fullName')"
+              ><i class="fas fa-pencil-alt"></i
+            ></span>
+          </div>
+
+          <!-- Username -->
+          <div class="info-row">
+            <label for="userName">Username:</label>
+            <input
+              type="text"
+              id="userName"
+              value=""
+              placeholder="Username"
+              disabled
+            />
+            <span class="edit-icon" onclick="enableEdit('userName')"
+              ><i class="fas fa-pencil-alt"></i
+            ></span>
+          </div>
+
+          <!-- Email -->
+          <div class="info-row">
+            <label for="email">Email:</label>
+            <input
+              type="email"
+              id="email"
+              value=""
+              placeholder="Email"
+              disabled
+            />
+            <span class="edit-icon" onclick="enableEdit('email')"
+              ><i class="fas fa-pencil-alt"></i
+            ></span>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="info-row">
+            <label for="phone">Phone Number:</label>
+            <input
+              type="text"
+              id="phone"
+              value=""
+              placeholder="Phone Number"
+              disabled
+            />
+            <span class="edit-icon" onclick="enableEdit('phone')"
+              ><i class="fas fa-pencil-alt"></i
+            ></span>
+          </div>
+        </div>
+
+        <!-- Achievements Section -->
+        <div class="badges-section">
+          <h3>Achievements</h3>
+          <div
+            class="badge"
+            onclick="showBadgePopup('Badge 1', 'Achievement description')"
+          >
+            <i class="fas fa-trophy"></i>
+          </div>
+          <button class="show-more-btn" onclick="showAllBadges()">
+            Show More
+          </button>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button class="save-btn" onclick="saveChanges()">Save Changes</button>
+          <button class="cancel-btn" onclick="cancelChanges()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Badge Popup -->
+    <div class="popup" id="badgePopup">
+      <div class="popup-content">
+        <h3 id="badgeTitle">Badge Title</h3>
+        <p id="badgeDescription">Badge description goes here.</p>
+        <button class="close-popup" onclick="closePopup()">Close</button>
+      </div>
+    </div>
+    <a href="/firstPage">
+      <button class="back-btn">Back</button>
+    </a>
+
+    <script>
+      // Global variable to store the selected file for the profile image
+      let selectedFile = null;
+
+      // Enable editing for a given input field
+      function enableEdit(fieldId) {
+        document.getElementById(fieldId).removeAttribute("disabled");
+        document.getElementById(fieldId).focus();
+      }
+
+      // Fetch the user profile from the backend and populate fields
+      async function fetchProfile() {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          alert("No token found. Please log in.");
+          return;
+        }
+        try {
+          const response = await fetch(
+            "http://localhost:5000/api/user/profile",
+            {
+              method: "GET",
+              headers: { Authorization: token },
+            }
+          );
+          const data = await response.json();
+          // Populate the input fields with retrieved user data
+          document.getElementById("fullName").value = data.name || "";
+          document.getElementById("userName").value = data.username || "";
+          document.getElementById("email").value = data.email || "";
+          document.getElementById("phone").value = data.phone || "";
+          if (data.photo) {
+            // Prepend the server address to the photo file path
+            document.getElementById("profilePic").src =
+              "http://localhost:5000/" + data.photo;
+          }
+        } catch (err) {
+          console.error("Error fetching profile:", err);
+        }
+      }
+
+      // Save changes by sending updated profile data (including the file if changed) to the backend
+      async function saveChanges() {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          alert("No token found. Please log in.");
+          return;
+        }
+        const formData = new FormData();
+        formData.append("fullName", document.getElementById("fullName").value);
+        formData.append("userName", document.getElementById("userName").value);
+        formData.append("email", document.getElementById("email").value);
+        formData.append("phone", document.getElementById("phone").value);
+        if (selectedFile) {
+          formData.append("photo", selectedFile);
+        }
+        try {
+          const response = await fetch(
+            "http://localhost:5000/api/user/update",
+            {
+              method: "POST",
+              headers: { Authorization: token },
+              body: formData,
+            }
+          );
+          const result = await response.json();
+          if (result.message) {
+            alert(result.message);
+            fetchProfile();
+          } else {
+            alert("Error updating profile.");
+          }
+        } catch (err) {
+          console.error("Error updating profile:", err);
+        }
+      }
+
+      // Cancel changes by re-fetching the profile data from the backend
+      function cancelChanges() {
+        fetchProfile();
+      }
+
+      // Badge popup functions
+      function showBadgePopup(title, description) {
+        document.getElementById("badgeTitle").textContent = title;
+        document.getElementById("badgeDescription").textContent = description;
+        document.getElementById("badgePopup").style.display = "flex";
+      }
+      function closePopup() {
+        document.getElementById("badgePopup").style.display = "none";
+      }
+      function showAllBadges() {
+        alert("Show more badges functionality is under development.");
+      }
+
+      // Image options functions
+      function showImageOptions() {
+        const options = document.getElementById("imageOptions");
+        options.style.display =
+          options.style.display === "block" ? "none" : "block";
+      }
+      function viewImage() {
+        const image = document.getElementById("profilePic");
+        image.style.width = "80%"; // Enlarge the image for viewing
+        document.getElementById("imageOptions").style.display = "none";
+      }
+      function updateImage() {
+        const imageInput = document.createElement("input");
+        imageInput.type = "file";
+        imageInput.accept = "image/*";
+        imageInput.onchange = function (event) {
+          const file = event.target.files[0];
+          if (file) {
+            selectedFile = file; // Save the selected file for uploading
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              const image = document.getElementById("profilePic");
+              image.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+          }
+        };
+        imageInput.click();
+        document.getElementById("imageOptions").style.display = "none";
+      }
+
+      // On page load, fetch the user profile data
+      document.addEventListener("DOMContentLoaded", function () {
+        fetchProfile();
+      });
+    </script>
+  </body>
+</html>

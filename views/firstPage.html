@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pandemic Response Dashboard</title>
+    <link rel="stylesheet" href="firstPage.css" />
+    <link rel="stylesheet" href="sideBar.css">
+    <link rel="stylesheet" href="video.css">
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Leaflet.js for Maps -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+
+    <!-- ScrollReveal for Animations -->
+    <script src="https://unpkg.com/scrollreveal"></script>
+
+    <!-- Leaflet Heatmap Plugin -->
+    <script src="https://unpkg.com/leaflet-heat/dist/leaflet-heat.js"></script>
+  </head>
+
+  <body>
+    <!-- Sticky Navbar -->
+    <nav class="navbar">
+      <div class="nav-logo">
+        <!-- <h1>Pandemic Dashboard</h1> -->
+        <img src="logo.png" alt="" class="main-logo" />
+        <!-- <div class="nav-items">
+          <a href="/pandamic">Analytical Dashboard</a>
+          <a href="/request">Raise a Request</a>
+          <a href="/stats">Statistics</a>
+        </div> -->
+        <div class="logo" onclick="toggleSidebar()">
+          <img src="logohaire.png" alt="Pandemic Response Logo" />
+          <!-- Replace with your image file -->
+        </div>
+      </div>
+      <!-- <ul>
+        <li><a href="#map">Global Map</a></li>
+        <li><a href="#charts">Statistics</a></li>
+        <li><a href="#alerts">Live Alerts</a></li>
+        <li><a href="#subscribe">Subscribe</a></li>
+      </ul> -->
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+      <div class="hero-image">
+        <img src="dil.jpeg" alt="Pandemic Image" />
+      </div>
+      <div class="hero-content">
+        <h1>Global Pandemic Response Dashboard</h1>
+        <p>Track outbreaks, monitor resources, and take action in real-time.</p>
+        <button class="explore-btn" onclick="window.location.href='#map'">
+          Explore Now
+        </button>
+      </div>
+    </header>
+
+    <!-- Global Statistics Section -->
+    <section id="global-stats" class="global-stats">
+      <div class="giving-info">
+        <div class="dropdown-container">
+          <label for="country-select">Select Country:</label>
+          <select id="country-select">
+            <option value="" selected>Select a country</option>
+          </select>
+        </div>
+        <div class="country-info">
+          <div class="name" id="country-name"></div>
+          <div class="flag" id="country-flag"></div>
+        </div>
+      </div>
+      <div class="pandemic-data">
+        <div class="stat-card">
+          <h3>Active Cases</h3>
+          <p id="active-cases">Loading...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Recovered</h3>
+          <p id="recovered">Loading...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Deaths</h3>
+          <p id="deaths">Loading...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Vaccinated</h3>
+          <p id="vaccinated">Loading...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Map Section -->
+    <section id="map" class="map-section hidden">
+      <h2>Global Pandemic Hotspots</h2>
+      <div id="pandemic-map"></div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section id="charts" class="charts">
+      <h2>Real-Time Pandemic Statistics</h2>
+      <div class="chart-container">
+        <canvas id="infectionRateChart"></canvas>
+        <canvas id="resourceAvailabilityChart"></canvas>
+      </div>
+    </section>
+    <div class="news-container">
+      <div class="circle"></div>
+      <div class="sticky-container">
+        <div class="rectangle">
+          <div class="headline-container">
+            <div class="headline" id="headline"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Alerts Section -->
+    <section id="alerts" class="alerts">
+      <h2>Live Alerts</h2>
+      <div id="alert-container" class="alert-container"></div>
+    </section>
+
+    <!-- Subscription Section -->
+    <section id="subscribe" class="subscribe">
+      <h2>Stay Updated with Live Alerts</h2>
+      <input
+        type="email"
+        id="email-input"
+        placeholder="Enter your email"
+        required
+      />
+      <button id="subscribe-btn">Subscribe</button>
+    </section>
+    <div class="popup" id="popup">
+      <span class="popup-text" id="popup-text"></span>
+      <button class="close-popup btn" id="close-popup">Close</button>
+    </div>
+    
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <!-- Logo in Sidebar -->
+      <div class="logo2">
+        <img src="logohaire.png" alt="Pandemic Response Logo" />
+      </div>
+
+      <!-- Update Profile Option -->
+      <a href="/profile" class="sidebar-link">Update Profile</a>
+
+      <!-- Other Options -->
+      <a href="/pandamic" class="sidebar-link">Live Pandemic Stats</a>
+      <a href="/request" class="sidebar-link">Need Resources</a>
+      <a href="/live" class="sidebar-link">Live Discussion</a>
+      <a href="#" class="sidebar-link">Emergency Help</a>
+      <a href="/firstPage" class="sidebar-link">Pandemic Stats</a>
+      <a href="/map" class="sidebar-link">Find Nearby Hospitals</a>
+      <a href="/stats" class="sidebar-link">Dashboard Analytics</a>
+
+      <!-- Change Theme Option -->
+      <div class="change-theme" onclick="openThemePopup()">Change Theme</div>
+
+      <!-- Support Button -->
+      <button class="support-btn">?</button>
+    </div>
+
+    <!-- Overlay for theme popup -->
+    <div class="overlay" id="overlay" onclick="closeThemePopup()"></div>
+
+    <!-- Theme Options Pop-Up -->
+    <div class="theme-popup" id="theme-popup">
+      <h3>Select a Theme</h3>
+
+      <!-- Horizontal Theme Options -->
+      <div class="theme-option-container">
+        <div class="theme-option theme1" onclick="changeTheme('theme1')"></div>
+        <div class="theme-option theme2" onclick="changeTheme('theme2')"></div>
+        <div class="theme-option theme3" onclick="changeTheme('theme3')"></div>
+        <div class="theme-option theme4" onclick="changeTheme('theme4')"></div>
+        <div class="theme-option theme5" onclick="changeTheme('theme5')"></div>
+        <div class="theme-option theme6" onclick="changeTheme('theme6')"></div>
+        <div class="theme-option theme7" onclick="changeTheme('theme7')"></div>
+        <div class="theme-option theme8" onclick="changeTheme('theme8')"></div>
+      </div>
+
+      <!-- Additional Options (Custom Image) -->
+      <button class="button" onclick="openCustomImagePopup()">
+        Custom Theme
+      </button>
+
+      <!-- Custom Image Popup -->
+      <div id="custom-image-popup" style="display: none; text-align: center">
+        <input
+          type="file"
+          class="input-field"
+          id="image-upload"
+          accept="image/*"
+        />
+        <button class="button" onclick="applyCustomImage()">Apply Image</button>
+      </div>
+
+      <!-- Close Popup and Reset Options -->
+      <button class="button" onclick="resetTheme()">Reset Theme</button>
+    </div>
+    <div id="videoOverlay" class="video-overlay">
+      <div class="video-container">
+        <button class="dismiss-btn" id="dismissBtn">&times;</button>
+        <button class="mute-btn" id="muteBtn">Unmute</button>
+        
+        <video id="infoVideo" muted>
+          <source id="videoSource" src="video1.mp4" type="video/mp4" />
+          Your browser does not support HTML5 video.
+        </video>
+      </div>
+      <button class="perm-dismiss-btn" id="permDismissBtn">Dismiss Videos</button>
+    </div>
+
+    <!-- Footer Section -->
+    <footer>
+      <p>
+        &copy; 2025 Pandemics Insights And Preparedness Hub| Powered by Elite
+        Squad Team
+      </p>
+    </footer>
+
+    <script src="firstPage.js"></script>
+    <script src="sideBar.js"></script>
+    <script src="video.js"></script>
+  </body>
+</html>

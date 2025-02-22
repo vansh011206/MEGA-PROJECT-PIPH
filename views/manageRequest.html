@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Requests</title>
+    <link rel="stylesheet" href="manageRequest.css">
+    <link rel="stylesheet" href="sideBar.css">
+    <link rel="stylesheet" href="video.css">
+</head>
+
+<body>
+    <div class="availability">
+        <h1>Available Resources</h1>
+        <div class="resources-container">
+            <div class="resource-category">
+                <div class="resource-card" data-type="medical">
+                    <img src="doctor.png" alt="Medical Supplies">
+                    <h3>Medical Supplies</h3>
+                    <p>50 available</p>
+                </div>
+            </div>
+            <div class="resource-category">
+                <div class="resource-card" data-type="food">
+                    <img src="food.png" alt="Food Assistance">
+                    <h3>Food Assistance</h3>
+                    <p>100 available</p>
+                </div>
+            </div>
+            <div class="resource-category">
+                <div class="resource-card" data-type="shelter">
+                    <img src="shelter.png" alt="Shelter">
+                    <h3>Shelter</h3>
+                    <p>20 available</p>
+                </div>
+            </div>
+        </div>
+        <div class="manage-request">
+            <button id="showFormButton">Manage Requests</button>
+        </div>
+    </div>
+
+    <section id="requestFormContainer">`
+        <div class="container">
+            <header class="header">
+                <h1>Manage Requests</h1>
+            </header>
+            <div class="filter">
+                <input type="text" id="search" placeholder="Search by User ID..." onkeyup="filterRequests()">
+                <button class="button" onclick="openAddRequestModal()">Add Request</button>
+            </div>
+            <table id="requestTable" class="table">
+                <thead>
+                    <tr>
+                        <th>Request ID</th>
+                        <th>Name</th>
+                        <th>User ID</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="request-1">
+                        <td>1</td>
+                        <td>user1</td>
+                        <td>Pending</td>
+                        <td><button onclick="viewRequestDetails(1)">View</button></td>
+                    </tr>
+                    <tr id="request-2">
+                        <td>2</td>
+                        <td>user2</td>
+                        <td>Approved</td>
+                        <td><button onclick="viewRequestDetails(2)">View</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal for Viewing/Updating Request -->
+        <div id="viewRequestModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('viewRequestModal')">&times;</span>
+                <h2>Request Details</h2>
+                <p id="requestDetails"></p>
+                <div id="updateButtons" style="display: none;">
+                    <button class="button approve" onclick="approveRequest()">Approve</button>
+                    <button class="button reject" onclick="rejectRequest()">Reject</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for Adding a New Request -->
+        <div id="addRequestModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('addRequestModal')">&times;</span>
+                <h2>Add New Request</h2>
+                <form id="addRequestForm">
+                    <label for="userId">User ID:</label>
+                    <input type="text" id="userId" required>
+                    <label for="description">Description:</label>
+                    <textarea id="description" required></textarea>
+                    <button type="submit" class="button">Add Request</button>
+                </form>
+            </div>
+        </div>
+    </section>
+    <div class="logo" onclick="toggleSidebar()">
+        <img src="logohaire.png" alt="Pandemic Response Logo" />
+        <!-- Replace with your image file -->
+      </div>
+    <div class="sidebar" id="sidebar">
+        <!-- Logo in Sidebar -->
+        <div class="logo2">
+          <img src="logohaire.png" alt="Pandemic Response Logo" />
+        </div>
+  
+        <!-- Update Profile Option -->
+        <a href="/profile" class="sidebar-link">Update Profile</a>
+
+      <!-- Other Options -->
+      <a href="/pandamic" class="sidebar-link">Live Pandemic Stats</a>
+      <a href="/request" class="sidebar-link">Need Resources</a>
+      <a href="#" class="sidebar-link">Need Help</a>
+      <a href="#" class="sidebar-link">Emergency Help</a>
+      <a href="/firstPage" class="sidebar-link">Pandemic Stats</a>
+      <a href="map" class="sidebar-link">Find Nearby Hospitals</a>
+      <a href="/stats" class="sidebar-link">Dashboard Analytics</a>
+  
+        <!-- Change Theme Option -->
+        <div class="change-theme" onclick="openThemePopup()">Change Theme</div>
+  
+        <!-- Support Button -->
+        <button class="support-btn">?</button>
+      </div>
+  
+      <!-- Overlay for theme popup -->
+      <div class="overlay" id="overlay" onclick="closeThemePopup()"></div>
+  
+      <!-- Theme Options Pop-Up -->
+      <div class="theme-popup" id="theme-popup">
+        <h3>Select a Theme</h3>
+  
+        <!-- Horizontal Theme Options -->
+        <div class="theme-option-container">
+          <div class="theme-option theme1" onclick="changeTheme('theme1')"></div>
+          <div class="theme-option theme2" onclick="changeTheme('theme2')"></div>
+          <div class="theme-option theme3" onclick="changeTheme('theme3')"></div>
+          <div class="theme-option theme4" onclick="changeTheme('theme4')"></div>
+          <div class="theme-option theme5" onclick="changeTheme('theme5')"></div>
+          <div class="theme-option theme6" onclick="changeTheme('theme6')"></div>
+          <div class="theme-option theme7" onclick="changeTheme('theme7')"></div>
+          <div class="theme-option theme8" onclick="changeTheme('theme8')"></div>
+        </div>
+  
+        <!-- Additional Options (Custom Image) -->
+        <button class="button" onclick="openCustomImagePopup()">
+          Custom Theme
+        </button>
+  
+        <!-- Custom Image Popup -->
+        <div id="custom-image-popup" style="display: none; text-align: center">
+          <input
+            type="file"
+            class="input-field"
+            id="image-upload"
+            accept="image/*"
+          />
+          <button class="button" onclick="applyCustomImage()">Apply Image</button>
+        </div>
+  
+        <!-- Close Popup and Reset Options -->
+        <button class="button" onclick="resetTheme()">Reset Theme</button>
+      </div>
+      <div id="videoOverlay" class="video-overlay">
+        <div class="video-container">
+          <button class="dismiss-btn" id="dismissBtn">&times;</button>
+          <button class="mute-btn" id="muteBtn">Unmute</button>
+          
+          <video id="infoVideo" muted>
+            <source id="videoSource" src="video1.mp4" type="video/mp4" />
+            Your browser does not support HTML5 video.
+          </video>
+        </div>
+        <button class="perm-dismiss-btn" id="permDismissBtn">Dismiss Videos</button>
+      </div>
+
+    <script src="manageRequest.js"></script>
+    <script src="sideBar.js"></script>
+    <script src="video.js"></script>
+</body>
+
+</html>
+
+
+<script>
+    let userEmail = localStorage.getItem('email');
+
+    // Check if email exists in localStorage
+    if (!userEmail) {
+        // Redirect if no email is found in localStorage
+        window.location.href = '/request';
+        return; // Exit the function
+    }
+
+    // Make the fetch request to check the email
+    fetch('/check-email', {
+        headers: {
+            'x-user-email': userEmail // userEmail from the frontend (e.g., from session or authentication)
+        }
+    })
+    .then(response => {
+        if (response.status === 200) {
+            // Access granted, do nothing (email is valid)
+        } else {
+            // Access denied, redirect to /request if email is not valid
+            window.location.href = '/request';
+        }
+    })
+    .catch(error => {
+        console.error('Error checking email:', error);
+        // If there is an error (e.g., network issue), redirect to /request
+        window.location.href = '/request';
+    });
+</script>
+
+
+</script>

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pandemic Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="sideBar.css">
+    <link rel="stylesheet" href="video.css">
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #121212;
+        color: #fff;
+        margin: 0;
+        padding: 0;
+      }
+      .card {
+        box-shadow: 0 4px 12px rgba(99, 238, 99, 0.1);
+        border: none;
+        border-radius: 15px;
+        background-color: #1e1e1e;
+      }
+      .dashboard-header {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #32cd32;
+        text-shadow: 2px 2px 8px rgba(50, 205, 50, 0.8);
+      }
+      .dropdown {
+        display: flex;
+        justify-content: space-between;
+      }
+      .notifications span {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 16px;
+      }
+      .notifications span.urgent {
+        background-color: #ff6347;
+        padding: 5px 10px;
+        border-radius: 5px;
+      }
+      .notifications span.info {
+        background-color: #1e90ff;
+        padding: 5px 10px;
+        border-radius: 5px;
+      }
+      .notifications span.reminder {
+        background-color: #32cd32;
+        padding: 5px 10px;
+        border-radius: 5px;
+      }
+      .quick-access button {
+        margin-top: 5px;
+        display: block;
+        width: 100%;
+        text-align: left;
+      }
+      .chart-container {
+        height: 300px;
+      }
+      .chart-container:hover {
+        cursor: pointer;
+      }
+
+      footer {
+        margin-top: 40px;
+        padding: 15px 0;
+        text-align: center;
+        background: #333;
+        border-top: 1px solid #444;
+        color: #fff;
+      }
+      .btn-outline-primary,
+      .btn-outline-secondary,
+      .btn-outline-danger {
+        color: #32cd32;
+        border-color: #32cd32;
+      }
+      .btn-outline-primary:hover,
+      .btn-outline-secondary:hover,
+      .btn-outline-danger:hover {
+        background-color: #32cd32;
+        color: #fff;
+      }
+      .btn-dark {
+        background-color: #333;
+        color: #fff;
+        border: 1px solid #444;
+      }
+      .btn-dark:hover {
+        background-color: #444;
+      }
+      .btn-light {
+        background-color: #444;
+        color: #fff;
+        border: 1px solid #555;
+      }
+      .btn-light:hover {
+        background-color: #555;
+      }
+      .active-btn {
+        background-color: #32cd32;
+        color: white;
+      }
+      .selected {
+        background-color: #32cd32 !important;
+        color: white;
+      }
+      .news-box {
+        border: 1px solid #444;
+        padding: 10px;
+        border-radius: 10px;
+        background-color: #333;
+        box-shadow: 1px 2px 6px rgba(255, 255, 255, 0.534);
+      }
+      .row{
+        border: 1px solid #444;
+        padding: 10px;
+        border-radius: 10px;
+        background-color: #333;
+        box-shadow: 1px 2px 6px rgba(255, 255, 255, 0.534);
+      }
+      
+      .hidden {
+        display: none;
+      }
+      .user-box {
+        margin-left: 30px;
+      }
+      .news-item a {
+        font-size: 24px;
+        /* color: grey; */
+        text-decoration: none;
+        transition: all 0.5s ease;
+      }
+      .news-item a:hover {
+        color: rgb(13, 110, 253);
+        text-decoration: underline;
+      }
+      .news-section {
+      font-family: "Poppins", sans-serif;
+      width: 1300px;
+      margin: 40px auto;
+    }
+
+    #news-section {
+      width: 100%;
+      margin: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      /* height: 300px; */
+    }
+
+    .image img {
+      width: 200px;
+    }
+
+    #news-container{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+    }
+    .news-item{
+      width: 100%;
+      display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+
+    }
+    .news-details a{
+      text-decoration: none;
+      color: rgb(177, 168, 168);
+    }
+    .news-details a:hover{
+      text-decoration: underline ;
+      color:blue;
+      transition: all 0.4s ease;
+    }
+    .news-details{
+      width: 70%;
+    }
+    .news-details p{
+      font-size: 13px;
+    }
+    .chart{
+      margin-top: 30px;
+    }
+    </style>
+  </head>
+  <body>
+    <div id="videoOverlay" class="video-overlay">
+      <div class="video-container">
+        <button class="dismiss-btn" id="dismissBtn">&times;</button>
+        <button class="mute-btn" id="muteBtn">Unmute</button>
+        
+        <video id="infoVideo" muted>
+          <source id="videoSource" src="video1.mp4" type="video/mp4" />
+          Your browser does not support HTML5 video.
+        </video>
+      </div>
+      <button class="perm-dismiss-btn" id="permDismissBtn">Dismiss Videos</button>
+    </div>
+    <div class="container my-5">
+      <h1 class="dashboard-header text-center">Pandemic Dashboard</h1>
+
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <select id="country-select" class="form-select">
+            <option value="">Select a Country</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <select class="form-select" id="pandemicSelect">
+            <option>Select Pandemic</option>
+            <option selected>COVID-19</option>
+            <option>SARS</option>
+            <option>H1N1</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Total Cases -->
+        <div class="col-lg-4 mb-3">
+          <div class="card p-3 text-center">
+            <h5>Total Cases</h5>
+            <div class="btn-group my-3">
+              <button class="btn btn-outline-primary" id="activeBtn">
+                Active
+              </button>
+              <button class="btn btn-outline-secondary" id="recoveredBtn">
+                Recovered
+              </button>
+              <button class="btn btn-outline-danger" id="deceasedBtn">
+                Deceased
+              </button>
+            </div>
+            <h3 id="totalCases">Loading...</h3>
+            <select class="form-select mt-3 hidden" id="timeSelect">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Latest News -->
+        <!-- <div class="col-lg-4 mb-3">
+          <div class="card p-3">
+            <h5>Latest News</h5>
+            <ul class="list-unstyled" id="newsList">
+              <li><a href="#" class="text-light">Loading news...</a></li>
+            </ul>
+          </div>
+        </div> -->
+
+        <!-- User Activity -->
+        <div class="col-lg-4 mb-3 user-box">
+          <div class="card p-3">
+            <h5>Government Officials:</h5>
+            <ul class="list-unstyled" id="userActivity">
+              <li>Coming Soon ...</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <section class="news-section" id="news">
+        <div id="news-section" class="news-box">
+          <h2>Pandemic News</h2>
+          <div id="news-container"></div>
+        </div>
+      </section>
+
+      <div class="row">
+        <!-- Performance Metrics -->
+        <div class="col-lg-4 mb-3">
+          <div class="card p-3">
+            <h5>Performance Metrics</h5>
+            <p>Recovery Rate: <strong id="recoveryRate">Loading...</strong></p>
+            <p>Death Rate: <strong id="deathRate">Loading...</strong></p>
+            <p>
+              Vaccination Rate: <strong id="vaccinationRate">Loading...</strong>
+            </p>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="col-lg-4 mb-3">
+          <div class="card p-3">
+            <h5>Notifications</h5>
+            <span class="urgent">Urgent: Update your vaccination status</span>
+            <span class="info">New guidelines released</span>
+            <span class="reminder">Daily report due in 2 hours</span>
+          </div>
+        </div>
+
+        <!-- Quick Access -->
+        <div class="col-lg-4 mb-3">
+          <div class="card p-3 quick-access">
+            <h5>Quick Access</h5>
+            <button class="btn btn-dark">Add New Report</button>
+            <button class="btn btn-light">View Detailed Data</button>
+            <button class="btn btn-light">Explore Map View</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row chart">
+        <!-- Pandemic Trends -->
+        <div class="col-lg-12">
+          <div class="card p-3">
+            <h5>Pandemic Trends</h5>
+            <div class="chart-container">
+              <canvas id="bar-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="logo" onclick="toggleSidebar()">
+      <img src="logohaire.png" alt="Pandemic Response Logo" />
+      <!-- Replace with your image file -->
+    </div>
+  <div class="sidebar" id="sidebar">
+      <!-- Logo in Sidebar -->
+      <div class="logo2">
+        <img src="logohaire.png" alt="Pandemic Response Logo" />
+      </div>
+
+      <!-- Update Profile Option -->
+      <a href="/profile" class="sidebar-link">Update Profile</a>
+
+      <!-- Other Options -->
+      <a href="/pandamic" class="sidebar-link">Live Pandemic Stats</a>
+      <a href="/request" class="sidebar-link">Need Resources</a>
+      <a href="#" class="sidebar-link">Need Help</a>
+      <a href="#" class="sidebar-link">Emergency Help</a>
+      <a href="/firstPage" class="sidebar-link">Pandemic Stats</a>
+      <a href="/map" class="sidebar-link">Find Nearby Hospitals</a>
+      <a href="/stats" class="sidebar-link">Dashboard Analytics</a>
+
+      <!-- Change Theme Option -->
+      <div class="change-theme" onclick="openThemePopup()">Change Theme</div>
+
+      <!-- Support Button -->
+      <button class="support-btn">?</button>
+    </div>
+
+    <!-- Overlay for theme popup -->
+    <div class="overlay" id="overlay" onclick="closeThemePopup()"></div>
+
+    <!-- Theme Options Pop-Up -->
+    <div class="theme-popup" id="theme-popup">
+      <h3>Select a Theme</h3>
+
+      <!-- Horizontal Theme Options -->
+      <div class="theme-option-container">
+        <div class="theme-option theme1" onclick="changeTheme('theme1')"></div>
+        <div class="theme-option theme2" onclick="changeTheme('theme2')"></div>
+        <div class="theme-option theme3" onclick="changeTheme('theme3')"></div>
+        <div class="theme-option theme4" onclick="changeTheme('theme4')"></div>
+        <div class="theme-option theme5" onclick="changeTheme('theme5')"></div>
+        <div class="theme-option theme6" onclick="changeTheme('theme6')"></div>
+        <div class="theme-option theme7" onclick="changeTheme('theme7')"></div>
+        <div class="theme-option theme8" onclick="changeTheme('theme8')"></div>
+      </div>
+
+      <!-- Additional Options (Custom Image) -->
+      <button class="button" onclick="openCustomImagePopup()">
+        Custom Theme
+      </button>
+
+      <!-- Custom Image Popup -->
+      <div id="custom-image-popup" style="display: none; text-align: center">
+        <input
+          type="file"
+          class="input-field"
+          id="image-upload"
+          accept="image/*"
+        />
+        <button class="button" onclick="applyCustomImage()">Apply Image</button>
+      </div>
+
+      <!-- Close Popup and Reset Options -->
+      <button class="button" onclick="resetTheme()">Reset Theme</button>
+    </div>
+
+    <footer>
+      <p>&copy; 2025 Elite Squad Team. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="sideBar.js"></script>
+    <script src="video.js"></script>
+    <script>
+      const apiKey = "ff96b9f361a74304950aeff92e607e7e"; // Replace with your News API key
+
+      const newsContainer = document.getElementById("news-container");
+
+      // Fetch pandemic news
+      async function fetchTopPandemicNews() {
+        try {
+          const response = await fetch(
+            `https://newsapi.org/v2/everything?q=pandemic OR COVID OR outbreak OR health crisis&language=en&sortBy=publishedAt&pageSize=6&apiKey=${apiKey}`
+          );
+
+          if (!response.ok) throw new Error("Failed to fetch news");
+
+          const data = await response.json();
+          displayNews(data.articles);
+        } catch (error) {
+          console.error("Error fetching news:", error.message);
+          newsContainer.innerHTML = `<p>Unable to load news at the moment. Please try again later.</p>`;
+        }
+      }
+
+      // Display news in the section
+      function displayNews(articles) {
+        newsContainer.innerHTML = ""; // Clear previous news
+
+        if (articles.length === 0) {
+          newsContainer.innerHTML = "<p>No pandemic-related news found.</p>";
+          return;
+        }
+
+        articles.forEach((article) => {
+          const newsItem = document.createElement("div");
+          newsItem.className = "news-item";
+
+          newsItem.innerHTML = `<div class="news-details">
+<h3><a href="${article.url}" target="_blank">${article.title}</a></h3>
+<p>${article.description || "No description available."}</p>
+</div>
+<div class ="image">
+    <img src=${article.urlToImage} />
+    <p><small>Published on: ${new Date(
+      article.publishedAt
+    ).toLocaleDateString()}</small></p>
+    </div>
+`;
+
+          newsContainer.appendChild(newsItem);
+        });
+      }
+
+      // Call the function to fetch news
+      fetchTopPandemicNews();
+
+      let pandemicData = {}; // Store fetched data
+
+      // Function to update the displayed data based on the selected button
+      function updateDisplayedData(type) {
+        let displayValue = "Loading...";
+        if (pandemicData && pandemicData[type] !== undefined) {
+          displayValue = pandemicData[type].toLocaleString();
+        }
+        document.getElementById("totalCases").textContent = displayValue;
+      }
+
+      // Highlight active button and remove highlighting from others
+      function highlightButton(selectedButton) {
+        const buttons = document.querySelectorAll(".btn");
+        buttons.forEach((button) => button.classList.remove("selected"));
+        selectedButton.classList.add("selected");
+      }
+      const activeBtn = document.getElementById("activeBtn");
+      // Handle button clicks to highlight
+      document
+        .getElementById("activeBtn")
+        .addEventListener("click", function () {
+          updateDisplayedData("active");
+          highlightButton(this);
+        });
+
+      document
+        .getElementById("recoveredBtn")
+        .addEventListener("click", function () {
+          updateDisplayedData("recovered");
+          activeBtn.classList.remove("active");
+          highlightButton(this);
+        });
+
+      document
+        .getElementById("deceasedBtn")
+        .addEventListener("click", function () {
+          updateDisplayedData("deceased");
+          activeBtn.classList.remove("active");
+          highlightButton(this);
+        });
+      let barChart; // Global variable for the bar chart instance
+
+      // Fetch all country data from REST Countries API
+      async function fetchCountries() {
+        const response = await fetch("https://restcountries.com/v3.1/all");
+        const countries = await response.json();
+        const countrySelect = document.getElementById("country-select");
+        countries.forEach((country) => {
+          const option = document.createElement("option");
+          option.textContent = country.name.common;
+          option.value = country.cca3;
+          countrySelect.appendChild(option);
+        });
+      }
+
+      // Function to fetch and update pandemic data for a specific country
+      async function fetchCovidData(countryCode) {
+        try {
+          const url = `https://disease.sh/v3/covid-19/countries/${countryCode}?strict=true`;
+          const response = await fetch(url);
+          const data = await response.json();
+          console.log(data);
+          pandemicData = data;
+
+          document.getElementById("activeBtn").classList.remove("active-btn");
+          updateDisplayedData("active");
+          const liveAgeGroupData = generateProportionalAgeGroupData(
+            data.active
+          );
+          const recoveredAgeGroupData = generateProportionalAgeGroupData(
+            data.recovered
+          );
+          const recoveryRate = data.recovered;
+          const totalCases = data.cases;
+          const deathRate = data.deaths;
+          const vaccinationRate = data.tests;
+          recoveryRateSection(recoveryRate, totalCases);
+          deathRateSection(deathRate, totalCases);
+          vaccinationRateSection(vaccinationRate, totalCases);
+          renderBarChart(liveAgeGroupData, recoveredAgeGroupData);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+
+      // Update country-specific data when selected
+      document
+        .getElementById("country-select")
+        .addEventListener("change", (e) => {
+          const countryCode = e.target.value;
+          if (countryCode) {
+            fetchCovidData(countryCode);
+            document.getElementById("activeBtn").classList.add("active");
+          }
+        });
+
+      // Fetch pandemic data (i.e., global or specific to selected pandemic)
+      async function fetchPandemicData(pandemicType) {
+        // Implement the fetch based on pandemic type (COVID-19, SARS, etc.)
+        if (pandemicType === "COVID-19") {
+          fetchCovidData("global");
+        } else {
+          console.log("Data for " + pandemicType + " not yet available");
+        }
+      }
+
+      // Load initial data
+      fetchCountries();
+      function generateProportionalAgeGroupData(cases) {
+        const ageGroupProportions = [0.1, 0.2, 0.3, 0.2, 0.2]; // 10%, 20%, 30%, 20%, 20%
+
+        // Generate age group data by multiplying cases with each proportion
+        const ageGroupData = ageGroupProportions.map((prop) =>
+          Math.floor(cases * prop)
+        );
+
+        // Return the chart data
+        return ageGroupData;
+      }
+      function recoveryRateSection(recover, totalCases) {
+        const recoveryRateBox = document.getElementById("recoveryRate");
+
+        // Check if recover and totalCases are valid numbers
+        if (isNaN(recover) || isNaN(totalCases) || totalCases === 0) {
+          recoveryRateBox.innerHTML = "Invalid data"; // Show error message if data is invalid
+          return;
+        }
+
+        const recoveryRate = Math.round((recover / totalCases) * 100); // Calculate and round to an integer
+        recoveryRateBox.innerHTML = `${recoveryRate}%`; // Display as a percentage
+      }
+      function deathRateSection(death, totalCases) {
+        const deathRateBox = document.getElementById("deathRate");
+        if (isNaN(death) || isNaN(totalCases) || totalCases === 0) {
+          deathRateBox.innerHTML = "Invalid data"; // Show error message if data is invalid
+          return;
+        }
+        const deathRate = Math.round((death / totalCases) * 100); // Calculate and round to an integer
+        deathRateBox.innerHTML = `${deathRate}%`;
+      }
+      function vaccinationRateSection(tests, totalCases) {
+        const vaccinationRateBox = document.getElementById("vaccinationRate");
+        if (isNaN(tests) || isNaN(totalCases) || totalCases === 0) {
+          vaccinationRateBox.innerHTML = "Invalid data"; // Show error message if data is invalid
+          return;
+        }
+        const vaccinationRate = Math.round((tests / totalCases) * 100); // Calculate and round to an integer
+        vaccinationRateBox.innerHTML = `${vaccinationRate}%`;
+      }
+
+      function renderBarChart(liveAgeGroupData, recoveredAgeGroupData) {
+        const ctx = document.getElementById("bar-chart").getContext("2d");
+
+        // If the bar chart exists, destroy and recreate it
+        if (barChart) {
+          barChart.destroy(); // Destroy the old chart
+        }
+        barChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: ["0-10", "11-20", "21-30", "31-40", "41-50", "51+"],
+            datasets: [
+              {
+                label: "Live Cases",
+                data: liveAgeGroupData,
+                backgroundColor: "#d35400",
+              },
+              {
+                label: "Recovered Cases",
+                data: recoveredAgeGroupData,
+                backgroundColor: "#d7bde2",
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 5,
+                },
+              },
+            },
+          },
+        });
+      }
+      fetchCovidData("India");
+    </script>
+  </body>
+</html>

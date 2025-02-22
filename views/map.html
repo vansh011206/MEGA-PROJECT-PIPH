@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Find Nearest Hospitals</title>
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css"
+    />
+    <!-- Leaflet Routing Machine CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"
+    />
+    <!-- Google Fonts -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+    />
+    <link rel="stylesheet" href="sideBar.css">
+    <link rel="stylesheet" href="video.css">
+    <style>
+      /* Reset & Global Styles */
+      * {
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+        transition: all 0.3s ease;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(135deg, #e2eafc, #f9fbff);
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      h2,
+      h3 {
+        margin: 0;
+        font-weight: 600;
+      }
+      /* Container & Layout */
+      .container {
+        width: 95%;
+        max-width: 1200px;
+        background: #fff;
+        margin: 20px auto;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 15px;
+      }
+      .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .main,
+      .navigations {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .allnavigation {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .allnavigation img {
+        width: 50px;
+      }
+      .allnavigation button {
+        background: #2ab100;
+        color: #fff;
+        border: none;
+        padding: 10px 18px;
+        font-size: 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.2s;
+      }
+      .allnavigation button:hover {
+        background: #0d8d01;
+        transform: translateY(-2px);
+      }
+      /* Map Styles */
+      #map {
+        height: 400px;
+        width: 100%;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        position: relative;
+        z-index: 100;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+      #info {
+        text-align: center;
+        font-size: 16px;
+        margin-top: 10px;
+        font-weight: 500;
+      }
+      /* Hospital List Styles */
+      #hospital-list {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+      }
+      #hospital-list li {
+        background: #fafafa;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        text-align: center;
+      }
+      #hospital-list li a {
+        text-decoration: none;
+        color: #1e1e1e;
+        font-size: 15px;
+        font-weight: 500;
+      }
+      #hospital-list li a:hover {
+        text-decoration: underline;
+        color: #007bff;
+      }
+      #hospital-list li button {
+        margin-top: 10px;
+        padding: 8px 12px;
+        background-color: #1eb300;
+        color: #fff;
+        border: none;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      #hospital-list li button:hover {
+        background-color: #0d8d01;
+      }
+      /* Popup Styles */
+      .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 101;
+        background: #fff;
+        padding: 25px 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        min-width: 280px;
+      }
+      .popup .popup-text {
+        font-size: 18px;
+        margin-bottom: 20px;
+      }
+      .popup .close-popup {
+        padding: 10px 20px;
+        background: #2ab100;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      .popup .close-popup:hover {
+        background: #0d8d01;
+      }
+      .black-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(51, 51, 51, 0.5);
+        z-index: 100;
+        display: none;
+      }
+      /* Loading Spinner Styles */
+      .spinner-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(43, 39, 39, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 102;
+      }
+      .spinner {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #007bff;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      /* Bell Animation */
+      @keyframes ring {
+        0% { transform: rotate(0); }
+        10% { transform: rotate(-20deg); }
+        20% { transform: rotate(20deg); }
+        30% { transform: rotate(-20deg); }
+        40% { transform: rotate(20deg); }
+        50% { transform: rotate(0); }
+      }
+      .ringing-bell {
+        display: inline-block;
+        animation: ring 0.5s ease-in-out 3;
+        margin-left: 8px;
+      }
+      /* Theme Toggle Button */
+      .theme-toggle {
+        background-color: #fff;
+        border: none;
+        outline: none;
+        border-radius: 50%;
+        cursor: pointer;
+        padding: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .theme-toggle img {
+        width: 40px;
+        border-radius: 50%;
+      }
+      /* Dark Theme */
+      .dark-theme {
+        background: #1e1e1e;
+        color: #eee;
+      }
+      .dark-theme .container {
+        background: #2c2c2c;
+        color: #eee;
+      }
+      .dark-theme button,
+      .dark-theme .close-popup {
+        background: #555;
+      }
+      .dark-theme #hospital-list li {
+        background: #444;
+        color: #eee;
+      }
+      /* Draggable Container Styles for Routing Info and Favorites */
+      .draggable {
+        position: fixed;
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        cursor: move;
+        z-index: 150;
+      }
+      #route-info {
+        width: 220px;
+        top: 20px;
+        right: 20px;
+        font-size: 14px;
+      }
+      #favorites-panel {
+        width: 220px;
+        bottom: 20px;
+        right: 20px;
+        font-size: 14px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      #favorites-panel h4 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+      }
+      #favorites-panel ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      #favorites-panel li {
+        padding: 5px;
+        border-bottom: 1px solid #ddd;
+      }
+      #favorites-panel li:last-child {
+        border-bottom: none;
+      }
+      #favorites-panel button {
+        margin-top: 5px;
+        padding: 5px 8px;
+        background: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="videoOverlay" class="video-overlay">
+      <div class="video-container">
+        <button class="dismiss-btn" id="dismissBtn">&times;</button>
+        <button class="mute-btn" id="muteBtn">Unmute</button>
+        
+        <video id="infoVideo" muted>
+          <source id="videoSource" src="video1.mp4" type="video/mp4" />
+          Your browser does not support HTML5 video.
+        </video>
+      </div>
+      <button class="perm-dismiss-btn" id="permDismissBtn">Dismiss Videos</button>
+    </div>
+    <div class="black-background"></div>
+    <div class="spinner-overlay" id="spinner" style="display: none">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+      <header>
+        <h2>Find Nearest Hospitals</h2>
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <img src="moon.png" alt="Light Mode" id="light-theme-icon" />
+          <img src="sun.png" alt="Dark Mode" id="dark-theme-icon" style="display: none" />
+        </button>
+      </header>
+
+      <div class="controls">
+        <div class="main">
+          <div class="allnavigation">
+            <img src="hospital.png" alt="Hospital Icon" />
+            <button onclick="getNearestHospitals(currentLat, currentLon)">
+              Find Hospitals
+            </button>
+          </div>
+          <div class="allnavigation">
+            <img src="location.png" alt="Location Icon" />
+            <button onclick="getLocation()">Show My Location</button>
+          </div>
+        </div>
+        <div class="navigations">
+          <div class="allnavigation">
+            <img src="street.png" alt="Street Map" />
+            <button onclick="changeMap('streets')">Street Map</button>
+          </div>
+          <div class="allnavigation">
+            <img src="Sattelite.png" alt="Satellite Map" />
+            <button onclick="changeMap('satellite')">Satellite Map</button>
+          </div>
+          <div class="allnavigation">
+            <img src="hybrid.png" alt="Hybrid Map" />
+            <button onclick="changeMap('hybrid')">Hybrid Map</button>
+          </div>
+        </div>
+      </div>
+
+      <p id="info">Determining your location...</p>
+      <div id="map"></div>
+
+      <h3>Nearest Hospitals:</h3>
+      <ul id="hospital-list">
+        <!-- Hospital list will be populated here -->
+      </ul>
+    </div>
+
+    <!-- Custom Draggable Routing Info Panel -->
+    <div id="route-info" class="draggable" style="display:none">
+      <strong>Route Info</strong>
+      <p id="route-distance">Distance: 0 km</p>
+      <button onclick="closeRouteInfo()" style="font-size:12px">Close</button>
+    </div>
+
+    <!-- Custom Draggable Favorites Panel -->
+    <div id="favorites-panel" class="draggable" style="display:none">
+      <h4>Favorites</h4>
+      <ul id="favorites-list">
+        <!-- Favorite hospitals will appear here -->
+      </ul>
+      <button onclick="clearFavorites()" style="font-size:12px">Clear Favorites</button>
+    </div>
+
+    <div class="popup" id="popup">
+      <span class="popup-text" id="popup-text"></span>
+      <button class="close-popup" id="close-popup">Close</button>
+    </div>
+    <div class="logo" onclick="toggleSidebar()">
+      <img src="logohaire.png" alt="Pandemic Response Logo" />
+      <!-- Replace with your image file -->
+    </div>
+  <div class="sidebar" id="sidebar">
+      <!-- Logo in Sidebar -->
+      <div class="logo2">
+        <img src="logohaire.png" alt="Pandemic Response Logo" />
+      </div>
+
+      <!-- Update Profile Option -->
+      <a href="/profile" class="sidebar-link">Update Profile</a>
+
+    <!-- Other Options -->
+    <a href="/pandamic" class="sidebar-link">Live Pandemic Stats</a>
+    <a href="/request" class="sidebar-link">Need Resources</a>
+    <a href="#" class="sidebar-link">Need Help</a>
+    <a href="#" class="sidebar-link">Emergency Help</a>
+    <a href="/firstPage" class="sidebar-link">Pandemic Stats</a>
+    <a href="map" class="sidebar-link">Find Nearby Hospitals</a>
+    <a href="/stats" class="sidebar-link">Dashboard Analytics</a>
+
+      <!-- Change Theme Option -->
+      <div class="change-theme" onclick="openThemePopup()">Change Theme</div>
+
+      <!-- Support Button -->
+      <button class="support-btn">?</button>
+    </div>
+
+    <!-- Overlay for theme popup -->
+    <div class="overlay" id="overlay" onclick="closeThemePopup()"></div>
+
+    <!-- Theme Options Pop-Up -->
+    <div class="theme-popup" id="theme-popup">
+      <h3>Select a Theme</h3>
+
+      <!-- Horizontal Theme Options -->
+      <div class="theme-option-container">
+        <div class="theme-option theme1" onclick="changeTheme('theme1')"></div>
+        <div class="theme-option theme2" onclick="changeTheme('theme2')"></div>
+        <div class="theme-option theme3" onclick="changeTheme('theme3')"></div>
+        <div class="theme-option theme4" onclick="changeTheme('theme4')"></div>
+        <div class="theme-option theme5" onclick="changeTheme('theme5')"></div>
+        <div class="theme-option theme6" onclick="changeTheme('theme6')"></div>
+        <div class="theme-option theme7" onclick="changeTheme('theme7')"></div>
+        <div class="theme-option theme8" onclick="changeTheme('theme8')"></div>
+      </div>
+
+      <!-- Additional Options (Custom Image) -->
+      <button class="button" onclick="openCustomImagePopup()">
+        Custom Theme
+      </button>
+
+      <!-- Custom Image Popup -->
+      <div id="custom-image-popup" style="display: none; text-align: center">
+        <input
+          type="file"
+          class="input-field"
+          id="image-upload"
+          accept="image/*"
+        />
+        <button class="button" onclick="applyCustomImage()">Apply Image</button>
+      </div>
+
+      <!-- Close Popup and Reset Options -->
+      <button class="button" onclick="resetTheme()">Reset Theme</button>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Leaflet Routing Machine JS -->
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    <script src="sideBar.js"></script>
+    <script src="video.js"></script>
+
+    <script>
+      let map, marker, routingControl;
+      let currentLat, currentLon;
+      const apiKey = "foJwrzIhpx6buK7dBC0P"; // MapTiler API Key
+      const spinner = document.getElementById("spinner");
+
+      // Custom Icons
+      const hospitalIcon = L.icon({
+        iconUrl: "hospital.png",
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+      });
+      const highlightedIcon = L.icon({
+        iconUrl: "hospital.png",
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+      });
+
+      // Popup Elements
+      const popup = document.getElementById("popup");
+      const popupText = document.getElementById("popup-text");
+      const closePopupButton = document.getElementById("close-popup");
+      const blackBackground = document.querySelector(".black-background");
+
+      // Bell Sound for Alerts
+      const alertSound = new Audio("bell.mp3");
+
+      // Favorites array (in-memory; can be extended to use localStorage)
+      let favorites = [];
+
+      closePopupButton.addEventListener("click", () => {
+        popup.style.display = "none";
+        blackBackground.style.display = "none";
+        alertSound.pause();
+        alertSound.currentTime = 0;
+      });
+
+      function showPopupMessage(message) {
+        popupText.textContent = message;
+        popup.style.display = "flex";
+        blackBackground.style.display = "block";
+      }
+
+      // Initialize Map at given coordinates
+      function initMap(lat, lon) {
+        map = L.map("map").setView([lat, lon], 13);
+        // Base Layer: OpenStreetMap
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+        // Additional Layer from MapTiler (for labels)
+        L.tileLayer(
+          `https://api.maptiler.com/maps/streets/256/{z}/{x}/{y}.png?key=${apiKey}`
+        ).addTo(map);
+      }
+
+      // Get User Location
+      function getLocation() {
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              currentLat = position.coords.latitude;
+              currentLon = position.coords.longitude;
+              getAddressFromCoordinates(currentLat, currentLon);
+              if (!map) {
+                initMap(currentLat, currentLon);
+              }
+              if (marker) {
+                map.removeLayer(marker);
+              }
+              marker = L.marker([currentLat, currentLon])
+                .addTo(map)
+                .bindPopup("📍 You are here!")
+                .openPopup();
+            },
+            (error) => {
+              console.error("Error getting location:", error);
+              document.getElementById("info").innerText =
+                "Unable to retrieve location.";
+            },
+            { enableHighAccuracy: true }
+          );
+        } else {
+          alert("Geolocation is not supported by this browser.");
+        }
+      }
+
+      // Reverse Geocode to get a readable address
+      function getAddressFromCoordinates(lat, lon) {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("info").innerText = data.display_name
+              ? `Your Location: ${data.display_name}`
+              : `Your Location: ${lat}, ${lon}`;
+          })
+          .catch((error) =>
+            console.error("Error fetching address:", error)
+          );
+      }
+
+      // Get Nearest Hospitals using Overpass API
+      function getNearestHospitals(lat, lon) {
+        if (!lat || !lon) {
+          alert("Location not determined yet.");
+          return;
+        }
+        spinner.style.display = "flex";
+        const radius = 5000; // 5 km radius
+        const overpassQuery = `[out:json];(node["amenity"="hospital"](around:${radius},${lat},${lon}););out body;`;
+        const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
+
+        fetch(overpassUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            spinner.style.display = "none";
+            let hospitalListHTML = "";
+            if (!data.elements || data.elements.length === 0) {
+              hospitalListHTML = "<li>No hospitals found nearby.</li>";
+              document.getElementById("hospital-list").innerHTML = hospitalListHTML;
+              return;
+            }
+            data.elements.slice(0, 5).forEach((hospital) => {
+              let name = hospital.tags.name || "Unknown Hospital";
+              let hospLat = hospital.lat;
+              let hospLon = hospital.lon;
+              let userLatLng = L.latLng(lat, lon);
+              let hospitalLatLng = L.latLng(hospLat, hospLon);
+              // Initially show straight-line distance (will update later with route info)
+              let directDistance = (userLatLng.distanceTo(hospitalLatLng) / 1000).toFixed(2);
+              let directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${lat},${lon}&destination=${hospLat},${hospLon}&travelmode=driving`;
+
+              getHospitalAddress(hospLat, hospLon, (address) => {
+                hospitalListHTML += `<li>
+                  <strong>${name}</strong>
+                  <p>${address}</p>
+                  <p>Straight Distance: ${directDistance} km</p>
+                  <a href="${directionsUrl}" target="_blank">🗺 Get Directions</a>
+                  <br>
+                  <button class="alert-hospital" data-lat="${hospLat}" data-lon="${hospLon}" data-name="${name}">
+                    Alert & Show Route <span class="ringing-bell" style="display:none">🔔</span>
+                  </button>
+                  <br>
+                  <button class="favorite-hospital" data-lat="${hospLat}" data-lon="${hospLon}" data-name="${name}">Favorite</button>
+                </li>`;
+                document.getElementById("hospital-list").innerHTML = hospitalListHTML;
+
+                // Place hospital marker on map
+                L.marker([hospLat, hospLon], { icon: hospitalIcon })
+                  .addTo(map)
+                  .bindPopup(
+                    `<strong>${name}</strong><br>
+                     ${address}<br>
+                     Straight Distance: ${directDistance} km<br>
+                     <a href="${directionsUrl}" target="_blank">🗺 Get Directions</a><br>
+                     <button class="alert-hospital" data-lat="${hospLat}" data-lon="${hospLon}" data-name="${name}">
+                     Alert & Show Route <span class="ringing-bell" style="display:none">🔔</span></button>`
+                  );
+              });
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching hospital data:", error);
+            spinner.style.display = "none";
+            document.getElementById("hospital-list").innerHTML =
+              "<li>Error fetching hospital data.</li>";
+          });
+      }
+
+      // Reverse Geocode for hospital address
+      function getHospitalAddress(lat, lon, callback) {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            callback(data.display_name || "Address not available");
+          })
+          .catch((error) => {
+            console.error("Error fetching hospital address:", error);
+            callback("Address not available");
+          });
+      }
+
+      // Change Map Type
+      function changeMap(type) {
+        let url;
+        if (type === "streets") {
+          url = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+        } else if (type === "satellite") {
+          url = `https://api.maptiler.com/maps/satellite/256/{z}/{x}/{y}.jpg?key=${apiKey}`;
+        } else if (type === "hybrid") {
+          url = `https://api.maptiler.com/maps/hybrid/256/{z}/{x}/{y}.jpg?key=${apiKey}`;
+        }
+        L.tileLayer(url, {
+          attribution: "&copy; OpenStreetMap contributors",
+        }).addTo(map);
+      }
+
+      // Draggable container functionality
+      function makeDraggable(el) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        el.onmousedown = dragMouseDown;
+        function dragMouseDown(e) {
+          e = e || window.event;
+          e.preventDefault();
+          pos3 = e.clientX;
+          pos4 = e.clientY;
+          document.onmouseup = closeDragElement;
+          document.onmousemove = elementDrag;
+        }
+        function elementDrag(e) {
+          e = e || window.event;
+          e.preventDefault();
+          pos1 = pos3 - e.clientX;
+          pos2 = pos4 - e.clientY;
+          pos3 = e.clientX;
+          pos4 = e.clientY;
+          el.style.top = (el.offsetTop - pos2) + "px";
+          el.style.left = (el.offsetLeft - pos1) + "px";
+        }
+        function closeDragElement() {
+          document.onmouseup = null;
+          document.onmousemove = null;
+        }
+      }
+      // Make the custom panels draggable
+      window.onload = function () {
+        getLocation();
+        makeDraggable(document.getElementById("route-info"));
+        makeDraggable(document.getElementById("favorites-panel"));
+      };
+
+      // Event Delegation for Alert Buttons and Favorite Buttons
+      document.addEventListener("click", function (event) {
+        // Alert & Show Route functionality
+        if (event.target && event.target.classList.contains("alert-hospital")) {
+          // Find the button element (in case the span inside was clicked)
+          let btn = event.target.closest(".alert-hospital");
+          const hospLat = btn.getAttribute("data-lat");
+          const hospLon = btn.getAttribute("data-lon");
+          const hospName = btn.getAttribute("data-name");
+          
+          // Show ringing bell animation
+          let bellIcon = btn.querySelector(".ringing-bell");
+          bellIcon.style.display = "inline-block";
+          setTimeout(() => {
+            bellIcon.style.display = "none";
+          }, 1500);
+          
+          // Play bell sound and show popup message
+          alertSound.play();
+          showPopupMessage(`Alert sent to ${hospName} hospital`);
+
+          // Remove any existing routing control and add a new one
+          if (routingControl) {
+            map.removeControl(routingControl);
+          }
+          routingControl = L.Routing.control({
+            waypoints: [
+              L.latLng(currentLat, currentLon),
+              L.latLng(hospLat, hospLon)
+            ],
+            lineOptions: {
+              styles: [{ color: "#007bff", weight: 5 }]
+            },
+            router: L.Routing.osrmv1({
+              serviceUrl: "https://router.project-osrm.org/route/v1"
+            }),
+            createMarker: function (i, wp) {
+              if (i === 1) {
+                return L.marker(wp.latLng, { icon: highlightedIcon });
+              }
+              return L.marker(wp.latLng);
+            },
+            addWaypoints: false,
+            draggableWaypoints: false,
+            fitSelectedRoutes: true,
+            showAlternatives: false,
+            collapsible: true
+          }).addTo(map);
+          // When the route is found, update the custom Route Info panel
+          routingControl.on('routesfound', function (e) {
+            const routes = e.routes;
+            if (routes.length > 0) {
+              const summary = routes[0].summary;
+              const distanceKm = (summary.totalDistance / 1000).toFixed(2);
+              document.getElementById("route-distance").innerText = `Distance: ${distanceKm} km`;
+              document.getElementById("route-info").style.display = "block";
+            }
+          });
+        }
+
+        // Favorite Hospital functionality
+        if (event.target && event.target.classList.contains("favorite-hospital")) {
+          const hospLat = event.target.getAttribute("data-lat");
+          const hospLon = event.target.getAttribute("data-lon");
+          const hospName = event.target.getAttribute("data-name");
+          // Check if already in favorites
+          if (!favorites.find(h => h.name === hospName && h.lat === hospLat)) {
+            favorites.push({ name: hospName, lat: hospLat, lon: hospLon });
+            updateFavoritesPanel();
+            showPopupMessage(`${hospName} added to favorites`);
+          } else {
+            showPopupMessage(`${hospName} is already in favorites`);
+          }
+        }
+      });
+
+      // Update Favorites Panel
+      function updateFavoritesPanel() {
+        const favoritesList = document.getElementById("favorites-list");
+        if (favorites.length > 0) {
+          document.getElementById("favorites-panel").style.display = "block";
+        }
+        let html = "";
+        favorites.forEach((fav, index) => {
+          html += `<li>
+                      <strong>${fav.name}</strong><br>
+                      <button onclick="viewFavoriteRoute(${index})">Show Route</button>
+                   </li>`;
+        });
+        favoritesList.innerHTML = html;
+      }
+
+      // View route for a favorite hospital
+      function viewFavoriteRoute(index) {
+        const fav = favorites[index];
+        if (fav) {
+          if (routingControl) {
+            map.removeControl(routingControl);
+          }
+          routingControl = L.Routing.control({
+            waypoints: [
+              L.latLng(currentLat, currentLon),
+              L.latLng(fav.lat, fav.lon)
+            ],
+            lineOptions: {
+              styles: [{ color: "#007bff", weight: 5 }]
+            },
+            router: L.Routing.osrmv1({
+              serviceUrl: "https://router.project-osrm.org/route/v1"
+            }),
+            createMarker: function (i, wp) {
+              if (i === 1) {
+                return L.marker(wp.latLng, { icon: highlightedIcon });
+              }
+              return L.marker(wp.latLng);
+            },
+            addWaypoints: false,
+            draggableWaypoints: false,
+            fitSelectedRoutes: true,
+            showAlternatives: false,
+            collapsible: true
+          }).addTo(map);
+          routingControl.on('routesfound', function (e) {
+            const routes = e.routes;
+            if (routes.length > 0) {
+              const summary = routes[0].summary;
+              const distanceKm = (summary.totalDistance / 1000).toFixed(2);
+              document.getElementById("route-distance").innerText = `Distance: ${distanceKm} km`;
+              document.getElementById("route-info").style.display = "block";
+            }
+          });
+        }
+      }
+
+      // Clear favorites
+      function clearFavorites() {
+        favorites = [];
+        updateFavoritesPanel();
+        document.getElementById("favorites-panel").style.display = "none";
+        showPopupMessage("Favorites cleared");
+      }
+
+      // Close the custom Route Info panel
+      function closeRouteInfo() {
+        document.getElementById("route-info").style.display = "none";
+        if (routingControl) {
+          map.removeControl(routingControl);
+        }
+      }
+      
+      // Theme Toggle Functionality
+      const lightThemeIcon = document.getElementById("light-theme-icon");
+      const darkThemeIcon = document.getElementById("dark-theme-icon");
+      function toggleTheme() {
+        if (document.body.classList.contains("dark-theme")) {
+          document.body.classList.remove("dark-theme");
+          lightThemeIcon.style.display = "block";
+          darkThemeIcon.style.display = "none";
+        } else {
+          document.body.classList.add("dark-theme");
+          lightThemeIcon.style.display = "none";
+          darkThemeIcon.style.display = "block";
+        }
+      }
+    </script>
+  </body>
+</html>
